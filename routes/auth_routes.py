@@ -19,10 +19,7 @@ async def login(user: User):
 
 
         # Verifies and authenticates user
-        if authenticate_user(email, password):
-            return True
-        else:
-            return False
+        return authenticate_user(email, password)
 
     
     except Exception as e:

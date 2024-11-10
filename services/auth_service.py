@@ -118,7 +118,7 @@ def authenticate_user(email, password):
             
             # Returns True if new hash matches the stored hash
             if new_hash == hash:
-                return True
+                return user_id
             else:
                 return False
 
