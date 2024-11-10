@@ -9,6 +9,133 @@ schema = os.environ.get("SCHEMA")
 
 
 
+
+## Login Functions ##
+
+# These functions are used when logging into an account
+
+
+# Returns user id of user with specified email address
+def get_user_id(cursor, email):
+    
+    try:
+        # Searches for users with specified email address
+        select_users = f"""
+            SELECT id
+            FROM {schema}.users
+            WHERE email = '{email}'
+        """
+
+        # Searches for users
+        cursor.execute(select_users)
+
+        # Grabs one user
+        result = cursor.fetchone()
+
+        # Formats result into dictionary
+        result = {
+            "user_id": result[0]
+        }
+
+
+        return result
+
+    
+    except Exception as e:
+        print(e)
+        return False
+   
+
+
+
+# Returns hash and salt of user with specified id
+def get_user_hash_user_salt(cursor, user_id):
+    
+    try:
+        # Searches for hashes and salts for user with specified id
+        select_user_hash_user_salt = f"""
+            SELECT uh.hash, us.salt 
+            FROM {schema}.users AS u
+            JOIN {schema}.user_hashes AS uh
+				ON u.id = uh.user_id
+			JOIN {schema}.user_salts AS us
+				ON u.id = us.user_id
+            WHERE u.id = {user_id}
+        """
+
+        # Searches for user hash and salt
+        cursor.execute(select_user_hash_user_salt)
+
+        # Grabs one pair
+        result = cursor.fetchone()
+
+        # Formats result into dictionary
+        result = {
+            "hash": result[0], 
+            "salt": result[1]
+        }
+
+
+        return result
+
+    
+    except Exception as e:
+        print(e)
+
+
+
+
+
+
+# Authenticates by decrypting stored hash and checking against user input
+# Returns True or False
+def authenticate_user(email, password):
+    
+    # Opens connection and cursor
+    connection = get_connection()
+    cursor = open_cursor(connection)
+
+
+    try:
+        user_id = get_user_id(cursor, email)
+
+        
+        if user_id:
+            # Retrieves user_id from dictionary
+            user_id = user_id["user_id"]
+            
+            
+            user_hash_user_salt = get_user_hash_user_salt(cursor, user_id)
+
+            # Retrieves hash and salt from dictionary
+            hash = user_hash_user_salt["hash"]
+            salt = user_hash_user_salt["salt"]
+
+            
+            # Generates password hash for input password with retrieved salt
+            new_hash = bcrypt.hashpw(password.encode("utf-8"), salt = salt)
+
+            
+            # Returns True if new hash matches the stored hash
+            if new_hash == hash:
+                return True
+            else:
+                return False
+
+
+    except Exception as e:
+        print(e)
+
+    finally:
+        close_cursor(cursor)
+        close_connection(connection)
+
+
+## End Login Functions ##
+
+
+
+
 ## Create Account Functions ##
 
 # These functions are used when an account is being created
@@ -155,3 +282,6 @@ def create_user(first_name, last_name, email, password):
 
     
     return user_rows
+
+
+## End Create Account Functions ##

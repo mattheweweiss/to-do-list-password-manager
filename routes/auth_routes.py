@@ -1,9 +1,34 @@
 from schemas.auth_schemas import User
-from services.auth_service import find_user, create_user
+from services.auth_service import find_user, create_user, authenticate_user
 
 from fastapi import APIRouter, Request
 
 users = APIRouter()
+
+
+
+
+# Logs into account
+# Verifies user existence in database and authenticates with password
+@users.get('/login')
+async def login(user: User):
+
+    try:
+        email = user.email
+        password = user.password
+
+
+        # Verifies and authenticates user
+        if authenticate_user(email, password):
+            return True
+        else:
+            return False
+
+    
+    except Exception as e:
+        print(e)
+        return e
+
 
 
 
@@ -25,6 +50,7 @@ async def create_account(user: User):
         else:
             raise Exception("The email address is already in-use")
 
+    
     except Exception as e:
         print(e)
         return e
