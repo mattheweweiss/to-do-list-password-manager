@@ -1,1 +1,6 @@
+bcrypt
 fastapi[standard]
+mysql-connector-python
+pydantic
+python-dotenv
+requests
