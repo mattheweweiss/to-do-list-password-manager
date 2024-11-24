@@ -23,11 +23,11 @@ def get_user_id(cursor, email):
         select_users = f"""
             SELECT id
             FROM {schema}.users
-            WHERE email = '{email}'
+            WHERE email = %s
         """
 
         # Searches for users
-        cursor.execute(select_users)
+        cursor.execute(select_users, (email, ))
 
         # Grabs one user
         result = cursor.fetchone()
@@ -60,11 +60,11 @@ def get_user_hash_user_salt(cursor, user_id):
 				ON u.id = uh.user_id
 			JOIN {schema}.user_salts AS us
 				ON u.id = us.user_id
-            WHERE u.id = {user_id}
+            WHERE u.id = %s
         """
 
         # Searches for user hash and salt
-        cursor.execute(select_user_hash_user_salt)
+        cursor.execute(select_user_hash_user_salt, (user_id, ))
 
         # Grabs one pair
         result = cursor.fetchone()
@@ -157,11 +157,11 @@ def find_user(email):
         select_users = f"""
             SELECT *
             FROM {schema}.users
-            WHERE email = '{email}'
+            WHERE email = %s
         """
 
         # Searches for users
-        cursor.execute(select_users)
+        cursor.execute(select_users, (email, ))
 
         # Grabs one user
         result = cursor.fetchone()
@@ -220,15 +220,15 @@ def create_user(first_name, last_name, email, password):
                 ,last_name
                 ,email
             ) VALUES (
-                '{first_name}'
-                ,'{last_name}'
-                ,'{email}'
+                %s
+                ,%s
+                ,%s
             )
         """
 
 
         # Inserts user into users table
-        cursor.execute(insert_user)
+        cursor.execute(insert_user, (first_name, last_name, email))
 
 
         # Grabs the ID of the inserted user
@@ -241,8 +241,8 @@ def create_user(first_name, last_name, email, password):
                 user_id
                 ,hash
             ) VALUES (
-                {user_id}
-                ,'{hash}'
+                %s
+                ,%s
             )
         """
 
@@ -253,20 +253,19 @@ def create_user(first_name, last_name, email, password):
                 user_id
                 ,salt
             ) VALUES (
-                {user_id}
-                ,'{salt}'
+                %s
+                ,%s
             )
         """
 
 
         # Inserts user hash into user_hashes table
-        cursor.execute(insert_hash)
+        cursor.execute(insert_hash, (user_id, hash))
         # Inserts user salt into user_salts table
-        cursor.execute(insert_salt)
+        cursor.execute(insert_salt, (user_id, salt))
 
 
         user_rows = cursor.rowcount
-        print(user_rows)
 
 
         connection.commit()
