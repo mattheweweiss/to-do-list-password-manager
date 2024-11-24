@@ -228,7 +228,7 @@ def create_user(first_name, last_name, email, password):
 
 
         # Inserts user into users table
-        cursor.execute(insert_user, (first_name, last_name, email, ))
+        cursor.execute(insert_user, (first_name, last_name, email))
 
 
         # Grabs the ID of the inserted user
@@ -260,9 +260,9 @@ def create_user(first_name, last_name, email, password):
 
 
         # Inserts user hash into user_hashes table
-        cursor.execute(insert_hash, (user_id, hash, ))
+        cursor.execute(insert_hash, (user_id, hash))
         # Inserts user salt into user_salts table
-        cursor.execute(insert_salt, (user_id, salt, ))
+        cursor.execute(insert_salt, (user_id, salt))
 
 
         user_rows = cursor.rowcount
